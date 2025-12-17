@@ -7,6 +7,7 @@ pipeline {
     parameters {
         string(name: 'NOMBREALUMNO', defaultValue: 'PABLO', description: 'NOMBREALUMNO')
         string(name: 'EDAD', defaultValue: '27', description: 'EDAD')
+        file(name: 'INPUT_FILE')
     }
 
     stages {
@@ -42,7 +43,7 @@ pipeline {
             steps {
                 sh '''#!/bin/bash
         source venv/bin/activate
-        python3 main.py "$NOMBREALUMNO" "$EDAD"
+        python3 main.py "$NOMBREALUMNO" "$EDAD" "$INPUT_FILE"
         '''
 
             }
