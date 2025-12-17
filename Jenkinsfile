@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    options {
-        skipDefaultCheckout(true)
-    }
-
     environment {
         PYTHON = 'python3'
     }
@@ -16,7 +12,6 @@ pipeline {
     }
 
     stages {
-
         stage('Checkout') {
             steps {
                 dir('src') {
@@ -41,16 +36,15 @@ pipeline {
         stage('Run Script') {
             steps {
                 catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-                    sh '''#!/bin/bash
+                    sh '''
                     source venv/bin/activate
 
-                    echo "Copiando archivo desde @tmp..."
-                    cp "$WORKSPACE@tmp/$INPUT_FILE" .
+                    echo "Archivo subido: $INPUT_FILE"
 
-                    echo "Archivo disponible en workspace:"
-                    ls -l "$INPUT_FILE"
+                    cp "$INPUT_FILE" input.txt
+                    ls -l input.txt
 
-                    $PYTHON src/main.py "$NOMBREALUMNO" "$EDAD" "$INPUT_FILE"
+                    python3 src/main.py "$NOMBREALUMNO" "$EDAD" "input.txt"
                     '''
                 }
             }
@@ -61,11 +55,11 @@ pipeline {
         always {
             echo 'Pipeline finalizado (always)'
         }
+        success {
+            echo 'Pipeline ejecutado correctamente'
+        }
         failure {
             echo 'El pipeline falló'
-        }
-        success {
-            echo 'Pipeline exitoso'
         }
     }
 }
