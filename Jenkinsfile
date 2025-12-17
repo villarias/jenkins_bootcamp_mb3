@@ -6,17 +6,25 @@ pipeline {
     }
 
     parameters {
-        string(name: 'NOMBREALUMNO', defaultValue: 'PABLO')
-        string(name: 'EDAD', defaultValue: '27')
-        file(name: 'INPUT_FILE')
+        string(name: 'NOMBREALUMNO', defaultValue: 'PABLO', description: 'Nombre del alumno')
+        string(name: 'EDAD', defaultValue: '27', description: 'Edad')
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 dir('src') {
                     checkout scm
                 }
+            }
+        }
+
+        stage('Verify Python') {
+            steps {
+                sh '''
+                    $PYTHON --version
+                '''
             }
         }
 
@@ -37,14 +45,8 @@ pipeline {
             steps {
                 catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
                     sh '''
-                    source venv/bin/activate
-
-                    echo "Archivo subido: $INPUT_FILE"
-
-                    cp "$INPUT_FILE" input.txt
-                    ls -l input.txt
-
-                    python3 src/main.py "$NOMBREALUMNO" "$EDAD" "input.txt"
+                        . venv/bin/activate
+                        python3 src/main.py "$NOMBREALUMNO" "$EDAD"
                     '''
                 }
             }
