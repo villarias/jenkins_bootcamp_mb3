@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     options {
-        // Evita que Jenkins haga checkout automático y borre el archivo subido
         skipDefaultCheckout(true)
     }
 
@@ -11,38 +10,18 @@ pipeline {
     }
 
     parameters {
-        string(
-            name: 'NOMBREALUMNO',
-            defaultValue: 'PABLO',
-            description: 'Nombre del alumno'
-        )
-        string(
-            name: 'EDAD',
-            defaultValue: '27',
-            description: 'Edad'
-        )
-        file(
-            name: 'INPUT_FILE',
-            description: 'Archivo a leer por el script Python'
-        )
+        string(name: 'NOMBREALUMNO', defaultValue: 'PABLO')
+        string(name: 'EDAD', defaultValue: '27')
+        file(name: 'INPUT_FILE')
     }
 
     stages {
 
         stage('Checkout') {
             steps {
-                // Checkout en subdirectorio para no borrar INPUT_FILE
                 dir('src') {
                     checkout scm
                 }
-            }
-        }
-
-        stage('Verify Python') {
-            steps {
-                sh '''
-                    $PYTHON --version
-                '''
             }
         }
 
@@ -65,7 +44,10 @@ pipeline {
                     sh '''#!/bin/bash
                     source venv/bin/activate
 
-                    echo "Archivo recibido: $INPUT_FILE"
+                    echo "Copiando archivo desde @tmp..."
+                    cp "$WORKSPACE@tmp/$INPUT_FILE" .
+
+                    echo "Archivo disponible en workspace:"
                     ls -l "$INPUT_FILE"
 
                     $PYTHON src/main.py "$NOMBREALUMNO" "$EDAD" "$INPUT_FILE"
@@ -79,11 +61,11 @@ pipeline {
         always {
             echo 'Pipeline finalizado (always)'
         }
-        success {
-            echo 'Pipeline ejecutado correctamente'
-        }
         failure {
             echo 'El pipeline falló'
+        }
+        success {
+            echo 'Pipeline exitoso'
         }
     }
 }
