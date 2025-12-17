@@ -43,6 +43,10 @@ pipeline {
             steps {
                 sh '''#!/bin/bash
         source venv/bin/activate
+
+        echo "Ruta real del archivo: $INPUT_FILE"
+        ls -l "$(dirname "$INPUT_FILE")"
+
         python3 main.py "$NOMBREALUMNO" "$EDAD" "$INPUT_FILE"
         '''
 
