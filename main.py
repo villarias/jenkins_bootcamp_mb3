@@ -1,5 +1,4 @@
 import sys
-from pathlib import Path
 print('Ejecutando el script de python')
 nombre = sys.argv[1]
 edad = sys.argv[2]
