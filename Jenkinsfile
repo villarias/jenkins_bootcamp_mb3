@@ -41,9 +41,9 @@ pipeline {
         stage('Run Script') {
             steps {
                 sh '''#!/bin/bash
-                    source venv/bin/activate
-                    python3 main.py ${params.NOMBREALUMNO} ${params.EDAD}
-                    '''
+        source venv/bin/activate
+        python3 main.py "$NOMBREALUMNO" "$EDAD"
+        '''
 
             }
         }
