@@ -42,7 +42,7 @@ pipeline {
             steps {
                 sh '''#!/bin/bash
                     source venv/bin/activate
-                    python3 script.py ${params.NOMBREALUMNO} ${params.EDAD}
+                    python3 main.py ${params.NOMBREALUMNO} ${params.EDAD}
                     '''
 
             }
