@@ -1,20 +1,40 @@
 pipeline {
     agent any
 
+    options {
+        // Evita que Jenkins haga checkout automático y borre el archivo subido
+        skipDefaultCheckout(true)
+    }
+
     environment {
         PYTHON = 'python3'
     }
+
     parameters {
-        string(name: 'NOMBREALUMNO', defaultValue: 'PABLO', description: 'NOMBREALUMNO')
-        string(name: 'EDAD', defaultValue: '27', description: 'EDAD')
-        file(name: 'INPUT_FILE')
+        string(
+            name: 'NOMBREALUMNO',
+            defaultValue: 'PABLO',
+            description: 'Nombre del alumno'
+        )
+        string(
+            name: 'EDAD',
+            defaultValue: '27',
+            description: 'Edad'
+        )
+        file(
+            name: 'INPUT_FILE',
+            description: 'Archivo a leer por el script Python'
+        )
     }
 
     stages {
 
         stage('Checkout') {
             steps {
-                checkout scm
+                // Checkout en subdirectorio para no borrar INPUT_FILE
+                dir('src') {
+                    checkout scm
+                }
             }
         }
 
@@ -32,8 +52,8 @@ pipeline {
                     $PYTHON -m venv venv
                     . venv/bin/activate
                     pip install --upgrade pip
-                    if [ -f requirements.txt ]; then
-                        pip install -r requirements.txt
+                    if [ -f src/requirements.txt ]; then
+                        pip install -r src/requirements.txt
                     fi
                 '''
             }
@@ -41,22 +61,26 @@ pipeline {
 
         stage('Run Script') {
             steps {
-                sh '''#!/bin/bash
-        source venv/bin/activate
+                catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                    sh '''#!/bin/bash
+                    source venv/bin/activate
 
-        echo "Ruta real del archivo: $INPUT_FILE"
-        ls -l "$(dirname "$INPUT_FILE")"
+                    echo "Archivo recibido: $INPUT_FILE"
+                    ls -l "$INPUT_FILE"
 
-        python3 main.py "$NOMBREALUMNO" "$EDAD" "$INPUT_FILE"
-        '''
-
+                    $PYTHON src/main.py "$NOMBREALUMNO" "$EDAD" "$INPUT_FILE"
+                    '''
+                }
             }
         }
     }
 
     post {
         always {
-            echo 'Pipeline finalizado'
+            echo 'Pipeline finalizado (always)'
+        }
+        success {
+            echo 'Pipeline ejecutado correctamente'
         }
         failure {
             echo 'El pipeline falló'
