@@ -4,6 +4,10 @@ pipeline {
     environment {
         PYTHON = 'python3'
     }
+    parameters {
+        string(name: 'NOMBREALUMNO', defaultValue: 'PABLO', description: 'NOMBREALUMNO')
+        string(name: 'EDAD', defaultValue: '27', description: 'EDAD')
+    }
 
     stages {
 
@@ -38,7 +42,7 @@ pipeline {
             steps {
                 sh '''
                     . venv/bin/activate
-                    $PYTHON main.py
+                    $PYTHON main.py ${params.NOMBREALUMNO} ${params.EDAD}
                 '''
             }
         }
